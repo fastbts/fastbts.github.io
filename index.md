@@ -1,37 +1,43 @@
-## Welcome to GitHub Pages
+# Fast and Light Bandwidth Testing for Internet Users
+### Introduction
+Bandwidth testing measures the access bandwidth of end hosts, which is crucial to emerging Internet applications for network-aware content delivery. However, today's bandwidth testing services (BTSes) are slow and costly---the tests take a long time to run, consume excessive data usage at the client side, and/or require large-scale test server deployments. The inefficiency and high cost of BTSes root in their methodologies that use excessive temporal and spatial redundancies for combating noises in Internet measurement. This paper presents FastBTS to make BTS fast and cheap while maintaining high accuracy. The key idea of FastBTS is to accommodate and exploit the noise rather than repetitively and exhaustively suppress the impact of noise. This is achieved by a novel statistical sampling framework (termed fuzzy rejection sampling). We build FastBTS as an end-to-end BTS that implements fuzzy rejection sampling based on elastic bandwidth probing and denoised sampling from high-fidelity windows, together with server selection and multi-homing support. Our evaluation shows that with only 30 test servers, FastBTS achieves the same level of accuracy compared to the state-of-the-art BTS (SpeedTest.net) that deploys \sim∼ 12,000 servers. Most importantly, FastBTS makes bandwidth tests 5.6\times× faster and 10.7\times× more data-efficient.
 
-You can use the [editor on GitHub](https://github.com/fastbts/fastbts.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+### FastBTS We Implement
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+<style>
+table th:nth-of-type(1) {
+    width: 100px;
+    max-width:100px;
+    min-width:100px;
+}
+</style>
 
-### Markdown
+|STS|Implementation|
+|:----:|------|
+|FastBTS|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/FastBTS](https://github.com/fastbts/fastbts.github.io/tree/master/FastBTS)|
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
+### Representitive Commercial STSes
 
-# Header 1
-## Header 2
-### Header 3
+|STS|Website|Our Implementation|
+|:----:|------|------|
+|SpeedOf|[https://speedof.me](https://speedof.me/)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/Speedof.me/](https://github.com/fastbts/fastbts.github.io/tree/master/Speedof.me/)|
+|BWP|[https://www.bandwidthplace.com](https://www.bandwidthplace.com/)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/BandwidthPlace](https://github.com/fastbts/fastbts.github.io/tree/master/BandwidthPlace/)|
+|SFtest|[https://sourceforge.net/speedtest](https://sourceforge.net/speedtest/)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/SourceForge/](https://github.com/fastbts/fastbts.github.io/tree/master/SourceForge/)|
+|ATTtest|[http://speedtest.att.com/speedtest](http://speedtest.att.com/speedtest/)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/ATTSpeedTest/](https://github.com/fastbts/fastbts.github.io/tree/master/ATTSpeedTest/)|
+|Xfinity|[http://speedtest.xfinity.com/](http://speedtest.xfinity.com)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/XFinity/](https://github.com/fastbts/fastbts.github.io/tree/master/XFinity/)|
+|FAST|[https://fast.com](https://fast.com)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/Fast.com](https://github.com/fastbts/fastbts.github.io/tree/master/Fast.com)|
+|SpeedTest|[https://speedtest.net](https://speedtest.net)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/SpeedTest.net](https://github.com/fastbts/fastbts.github.io/tree/master/SpeedTest.net)|
 
-- Bulleted
-- List
 
-1. Numbered
-2. List
+### Non-flooding STSes
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
-```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+|STS|Implementation|
+|:----:|------|
+|TOPP|[https://github.com/fastbts/<br>fastbts.github.io/blob/master/nonFlooding](https://github.com/fastbts/fastbts.github.io/tree/master/nonFlooding)|
+|IGI|[https://github.com/fastbts/<br>fastbts.github.io/blob/master/nonFlooding](https://github.com/fastbts/fastbts.github.io/tree/master/nonFlooding)|
+|PathChirp|[https://github.com/fastbts/<br>fastbts.github.io/blob/master/nonFlooding](https://github.com/fastbts/fastbts.github.io/tree/master/nonFlooding)|
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/fastbts/fastbts.github.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
