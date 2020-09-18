@@ -30,7 +30,7 @@ table th:nth-of-type(1) {
 |SpeedTest|[https://speedtest.net](https://speedtest.net)|[https://github.com/fastbts/<br>fastbts.github.io/tree/master/SpeedTest.net](https://github.com/fastbts/fastbts.github.io/tree/master/SpeedTest.net)|
 
 
-### Non-flooding BTSes
+### Other Bandwidth Testing systems and Methods
 
 
 
