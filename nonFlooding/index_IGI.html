@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+</head>
+<body onload="init()">
+
+</body>
+</html>
+<script type="text/javascript" src="target.js"></script>
+
+<script>
+	var cnt=0;
+	function ping(target){
+		ptime = performance.now();
+		$.get(target+"?"+performance.now(),function(data){
+			cnt++;
+			delta =  Math.ceil(performance.now() - ptime);
+			console.log("RTT = "+delta);
+			if(cnt<10){
+				ping(target);
+			}else{
+				communication();
+			}
+	    });
+	}
+	function init(){
+		ping(target);
+	}
+	function communication(){
+		var ws = new WebSocket(target);
+		//var ws = new WebSocket('ws://localhost:8080');	
+			function time2stamp(){
+			    var d = new Date();
+			    return Date.parse(d)+d.getMilliseconds();
+			}
+		ws.onopen = function () {
+		};
+		
+		var k=0;
+		var times=new Array();
+		for(var i=0;i<200;i++)times.push(0);
+		
+		var k=0;
+		var lim=2;
+		var t1,t2;
+		var res=new Array();
+		var ts=new Array();
+		var st=0;
+		cnt=1;
+		ws.onmessage = function (e) {
+			if(st==0){
+				k++;
+				if(k==100){
+					st=1;
+					k=0;
+				}
+				return;
+			}
+			if(k==0)t1=performance.now();
+			k++;
+			ts.push(performance.now());
+			if(k==lim){
+				res.push((lim-1)*1000*8*1456/1024/1024/(performance.now()-t1));
+				lim*=2;
+				console.log(cnt+" " +res[res.length-1]);
+				cnt++;
+				k=0;
+			}
+			if(lim==65536*2){
+				var str="";
+				for(var i=0;i<res.length;i++)str=str+res[i]+"\t";
+				str+="\n";
+				for(var i=0;i<ts.length;i++)str=str+ts[i]+"\n";
+				saveData(str);
+			}
+		};
+
+	}
+   	function saveData(str){
+		var t = new Blob([str], {type : 'application/txt'});
+    	var a = document.createElement("a");
+		a.href=URL.createObjectURL(t)
+		a.download="data.txt";
+		a.click();
+ 	}
+</script>

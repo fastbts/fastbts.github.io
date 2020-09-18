@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="jquery.ba-throttle-debounce.js"></script>
+	</head>
+	<script type="text/javascript" src="target.js"></script>
+	<script>
+		function ping(target,i){
+			ptime = performance.now();
+			$.get(target+"?"+performance.now(),function(data){
+				delta =  Math.ceil(performance.now() - ptime);
+				pingList[i]=delta;
+				console.log(i+" "+delta);
+		    });
+		}
+		function onload() {
+			init();
+			getIP();
+		}
+		function changeTime(newTimeLimit){
+			timeLimit=newTimeLimit;
+		}
+		var timeLimit=12;
+		var throughput;
+		var isFinished;
+		var globalTime;
+		var serverCnt=20;
+		var pingList;
+		var sip;
+		function init(){
+			throughput=new Array();
+			for(i=0;i<8;i++)throughput.push(0);
+			pingList=new Array();
+			for(i=0;i<serverCnt;i++)pingList.push(3000);
+			isFinished=0;
+			globalTime=0;
+		}
+		function sendToServer(result){
+			console.log("final result = "+result);
+			var pingString="";
+			for(i=0;i<serverCnt;i++)pingString+=pingList[i]+" ";
+			$.post("getData.php", { sysid: 0,sip:sip, ping:pingString,ATTresult:result},function(data){
+		    	console.log(data);
+		    });
+		}
+		function timerStart(){
+			intervalId=setInterval(function (){
+				globalTime+=100;
+				document.getElementById("timeOutput").innerHTML=globalTime/1000;
+				if(globalTime>=timeLimit*1000){
+					isFinished=1;
+					var result=0;
+					checkResult=setInterval(function (){
+						for(i=0;i<8;i++)result+=throughput[i]/1024/1024/timeLimit;
+						sendToServer(result);
+						clearInterval(checkResult);
+					},1000);
+					clearInterval(intervalId);
+				}
+			},100);
+		}
+		function downloadThread(fname,i){
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", fname);
+			xhr.onprogress = function(e) {
+				if(isFinished){
+					xhr.abort();
+					throughput[i]=e.loaded;
+					return;
+				}
+			}
+			xhr.send();
+		}
+		var ip;
+		function getIP(){
+			for(i=0;i<serverCnt;i++){
+				ping("http://"+target[i]+"/test.html",i);
+			}
+			intervalId2=setInterval(function (){
+				var point=new Array();
+				for(i=0;i<serverCnt;i++){
+					point[i]=new Array();
+					point[i][0]=pingList[i];
+					point[i][1]=i;
+				}
+				for(i=0;i<serverCnt;i++){
+					for(j=i+1;j<serverCnt;j++){
+						if(point[i][0]>point[j][0]){
+							var tem=point[i][0];
+							point[i][0]=point[j][0];
+							point[j][0]=tem;
+							tem=point[i][1];
+							point[i][1]=point[j][1];
+							point[j][1]=tem;
+						}
+					}
+				}
+				sip="";
+				ip=new Array();
+				for(i=0;i<2;i++){
+					sip+=target[point[i][1]]+" ";
+					ip.push("http://"+target[point[i][1]]+"/fileinf");
+				}
+				clearInterval(intervalId2);
+			},2000);
+			
+		}
+		function start(){
+			timerStart();
+			for(i=0;i<2;i++)
+				for(j=0;j<4;j++)
+					downloadThread(ip[i]+"?"+performance.now(),i*4+j);
+		}
+	</script>
+	<body onload="onload()">
+		<button onclick='ping()'>ping</button>
+		<button onclick='start()'>start</button>
+		<div id='timeOutput'>1</div>
+		<div id='showSpeedPoint'></div>
+	</body>
+</html>
+
+
+

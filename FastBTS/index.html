@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="jquery.ba-throttle-debounce.js"></script>
+	</head>
+	<script>
+		function ping(target,i){
+			ptime = performance.now();
+			$.get(target+"?"+performance.now(),function(data){
+				delta =  Math.ceil(performance.now() - ptime);
+				pingList[i]=delta;
+				console.log(i+" "+delta);
+		    });
+		}
+		function onload() {
+			init();
+			getIP();
+			document.getElementById("btnstart").click();
+		}
+		function changeTime(newTimeLimit){
+			timeLimit=newTimeLimit;
+		}
+		var timeLimit=10;
+		var throughput;
+		var speedPoint;
+		var threadSpeed;
+		var isFinished;
+		var globalTime;
+		var target=[""];
+		var serverCnt=target.length;
+//		var serverCnt=2;
+		var kt=1;
+		var pingList;
+		var sip;
+		var isStart;
+		
+		var starttime=new Array();
+		function init(){
+			isStart=0;
+			threadSpeed=new Array();
+			speedPoint=new Array();
+			for(i=0;i<kt;i++)threadSpeed[i]=0;
+			throughput=new Array();
+			for(i=0;i<kt;i++)throughput.push(0);
+			pingList=new Array();
+			for(i=0;i<serverCnt;i++)pingList.push(0);
+			isFinished=0;
+			globalTime=0;
+		}
+		function calc(){
+			var a=speedPoint;
+			a.sort();
+//			console.log(a);
+			var minl=(a[a.length-1]-a[0])/(a.length);
+			var res=0.0;
+			var up=0,down=0;
+			for(i=0;i<a.length;i++){
+				for(j=i+1;j<a.length;j++){
+					var k=j-i+1;
+					var l=a[j]-a[i];
+					if(l<minl)continue;
+					if(k*k*1.0/l>res){
+						res=k*k*1.0/l;
+						down=a[i];
+						up=a[j];
+					}
+				}
+			}
+			console.log(up+' '+down);
+		}
+		function timerStart(){
+			intervalId=setInterval(function (){
+				if(isStart<kt)return;
+				if(isFinished)return;
+				
+				globalTime+=500;
+				document.getElementById("timeOutput").innerHTML=globalTime/1000;
+				var spd=0;
+				for(i=0;i<kt;i++)spd+=threadSpeed[i];
+//				for(i=0;i<kt;i++)spd+=throughput[i]/(performance.now()-starttime[i])*1000/1024/1024*8;
+//				for(i=0;i<kt;i++)spd+=throughput[i]/(globalTime)/1000*8;
+//				speedPoint.push(spd);
+				//console.log(spd);
+				//document.getElementById("showSpeedPoint").innerHTML=spd;
+//				calc();
+				
+				if(globalTime>=timeLimit*1000){
+					isFinished=1;
+//					var result=0;
+//					checkResult=setInterval(function (){
+//						for(i=0;i<kt;i++)result+=throughput[i]/1024/1024/timeLimit;
+//						console.log(result);
+////						sendToServer(result);
+//						clearInterval(checkResult);
+//					},100);
+					clearInterval(intervalId);
+				}
+			},500);
+		}
+		var isst=new Array();
+		function downloadThread(tip,i){
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", tip);
+//			starttime[i]=performance.now();
+			var stime;
+			xhr.onprogress = function(e) {
+				if(isFinished){
+					xhr.abort();
+					return;
+				}
+				if(isst[i]!=1){
+					stime=performance.now();
+					isst[i]=1;
+					isStart++;
+				}
+				throughput[i]=e.loaded;
+//				console.log(i + " " + e.loaded);
+				threadSpeed[i]=e.loaded/(performance.now()-stime)*1000/1024/1024*8
+				
+//				var tp=e.loaded;
+//				var time=performance.now()/1000;
+//				q1.push(time);
+//				q2.push(tp);
+//				var l1=q1.length;
+//				var l2=q2.length;
+//				if(l1>=2){
+//					threadSpeed[i]=(q2[l2-1]-q2[0])/(q1[l1-1]-q1[0])/1024/1024;
+//				}
+//				while(l1>2&&(q1[l1-1]-q1[0]>1000)){
+//					q1.shift();q2.shift();
+//					l1--;
+//				}
+			}
+			xhr.send();
+		}
+		var ip;
+		function sendToServer(){
+			var speedString=0;
+			var count=speedPoint.length;
+			for(i=1;i<speedPoint.length;i++)
+				speedString+=' '+speedPoint[i];
+//			for(i=1;i<threadSpeed.length;i++)
+//				speedString+=threadSpeed[i]/1024/1024/timeLimit;
+			var pingString="";
+			for(i=0;i<serverCnt;i++)pingString+=pingList[i]+" ";
+			var EVstring="";
+			for(i=0;i<serverCnt;i++)EVstring+=EVList[i]+" ";
+			$.post("getData.php", { sysid: 7,sip:sip, ping:pingString,speed:speedString ,count:count,EV:EVstring,exping:""},function(data){
+		    	console.log(data);
+		    });
+		    var pingString2="";
+		    var speedString2="";
+		    var sipString="";
+		    for(i=0;i<kt;i++)pingString2+=chosenPing[i]+" ";
+		    for(i=0;i<kt;i++)speedString2+=chosenV[i]+" ";
+		    for(i=0;i<kt;i++)sipString+=chosenIP[i]+" ";
+			$.post("saveHistory.php", { count:chosenCnt,ping: pingString2,speed:speedString2, sip:sipString},function(data){
+		    	console.log(data);
+		    });
+		}
+		function getServer(){
+			for(i=0;i<serverCnt;i++){
+				ping("http://"+target[i]+"/test.html",i);
+			}
+			intervalId2=setInterval(function (){
+				var pingString="";
+				for(i=0;i<serverCnt;i++)pingString+=pingList[i]+" ";
+				$.post("getHistory.php", { ping: pingString},function(data){
+			    	var evdata=data.split(" ");
+					for(i=0;i<serverCnt;i++)EVList[i]=evdata[i];
+					point=new Array();
+					for(i=0;i<serverCnt;i++){
+						point[i]=new Array();
+						point[i][0]=EVList[i];
+						point[i][1]=i;
+					}	
+					for(i=0;i<serverCnt;i++){
+						for(j=i+1;j<serverCnt;j++){
+							if(point[i][0]<point[j][0]){
+								var tem=point[i][0];
+								point[i][0]=point[j][0];
+								point[j][0]=tem;
+								tem=point[i][1];
+								point[i][1]=point[j][1];
+								point[j][1]=tem;
+							}
+						}
+					}
+					sip="";
+					ip=new Array();
+					for(i=0;i<sserverCnt;i++){
+						sip+=target[point[i][1]]+" ";
+						ip.push("http://"+target[point[i][1]]+"/fileinf");
+						chosenPing.push(pingList[point[i][1]]);
+						chosenIP.push(point[i][1]);
+					}
+					clearInterval(intervalId2);
+			    });
+			},2000);
+		}
+		function getIP(){
+//			for(i=0;i<serverCnt;i++){
+//				ping("http://"+target[i]+"/test.html",i);
+//			}
+//			var point=new Array();
+//			for(i=0;i<serverCnt;i++){
+//				point[i]=new Array();
+//				point[i][0]=pingList[i];
+//				point[i][1]=i;
+//			}
+//			for(i=0;i<serverCnt;i++){
+//				for(j=i+1;j<serverCnt;j++){
+//					if(point[i][0]>point[j][0]){
+//						var tem=point[i][0];
+//						point[i][0]=point[j][0];
+//						point[j][0]=tem;
+//						tem=point[i][1];
+//						point[i][1]=point[j][1];
+//						point[j][1]=tem;
+//					}
+//				}
+//			}
+//			sip="";
+			ip=new Array();
+//			sip+=target[point[0][1]];
+//			ip.push("http://"+target[point[0][1]]+"/fileinf");
+			ip.push("http://"+target[0]+"/fileinf");
+		}
+		function start(){
+			timerStart();
+			for(i=0;i<kt;i++)downloadThread(ip[0]+"?"+performance.now(),i);
+		}
+	</script>
+	<body onload="onload()">
+		<p hidden><button id='btnstart' onclick='start()'>start</button></p>
+		<div id='timeOutput'>1</div>
+		<div id='showSpeedPoint'></div>
+	</body>
+</html>
+
+
+

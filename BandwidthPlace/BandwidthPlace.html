@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SpeedOf and BandwidthPlace</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="jquery.ba-throttle-debounce.js"></script>
+	</head>
+	<script type="text/javascript" src="target.js"></script>
+	<script>
+		function onload() {
+			init();
+			getIP();
+		}
+		function changeTime(newTimeLimit){
+			timeLimit=newTimeLimit;
+		}
+		var timeLimit=8;
+		var BWPspeed;
+		var ip;
+		var sip;
+		var pingList;
+		var serverCnt=target.length;
+		function ping(target,i){
+			ptime = performance.now();
+			$.get(target+"?"+performance.now(),function(data){
+				delta =  Math.ceil(performance.now() - ptime);
+				pingList[i]=delta;
+		    });
+		}
+		function getIP(){
+			for(i=0;i<serverCnt;i++){
+				ping("http://"+target[i]+"/test.html",i);
+			}
+			intervalId2=setInterval(function (){
+				var mping=pingList[0];
+				var mid=0;
+				for(i=0;i<serverCnt;i++){
+					if(pingList[i]<mping){
+						mping=pingList[i];
+						mid=i;
+					}
+				}
+				ip="http://"+target[mid]+"/file";
+				sip=target[mid];
+				clearInterval(intervalId2);
+			},2000);
+		}
+		function init(){
+			BWPspeed=new Array();
+			pingList=new Array();
+			for(i=0;i<serverCnt;i++)pingList.push(3000);
+		}
+		function sendToServer(){
+			for(i=0;i<serverCnt;i++)console.log(pingList[i]);
+			var Bresult=0;
+			for(i=0;i<BWPspeed.length;i++)
+				Bresult=Math.max(Bresult,BWPspeed[i]);
+			console.log("BWP="+Bresult);
+			var pingString="";
+			for(i=0;i<serverCnt;i++)pingString+=pingList[i]+" ";
+			$.post("getData.php", { sysid: 2,sip:sip, ping:pingString,Bresult:Bresult},function(data){
+//		    	console.log(data);
+		    });
+		}
+		function downloadThread(id){
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", ip+id+"?"+performance.now());
+			var startTime=performance.now();
+			xhr.onloadend = function(e){
+				var endTime=performance.now();
+				BWPspeed.push(e.loaded/1024/1024*1000/(endTime-startTime));
+				console.log(id +' '+e.loaded/1024/1024*1000/(endTime-startTime));
+				if(endTime-startTime<=timeLimit*1000&&id!=11){
+					console.log("new thread :"+(id+1));
+					downloadThread(id+1);
+				}else{
+					var size=1024*128;
+					for(i=1;i<id;i++)size*=2;
+					sendToServer();
+				}
+			}
+			xhr.send();
+		}
+		function start(){
+			downloadThread(1);
+		}
+	</script>
+	<body onload="onload()">
+		<!--<button onclick="changeTime(document.getElementById('timeInput').value)">set time</button>-->
+		<!--<input id='timeInput'><br/>-->
+		<!--<button onclick='ping()'>ping</button>-->
+		<button onclick='start()'>start</button>
+		<!--<div id='timeOutput'>1</div>-->
+		<div id='showSpeedPoint'></div>
+	</body>
+</html>

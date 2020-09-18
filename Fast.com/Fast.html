@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fast System</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="jquery.ba-throttle-debounce.js"></script>
+	</head>
+	<script type="text/javascript" src="target.js"></script>
+	<script>
+		function onload() {
+			init();
+			getIP();
+		}
+		function changeTime(newTimeLimit){
+			timeLimit=newTimeLimit;
+		}
+		var timeLimit=30;
+		var threadSpeed;
+		var speedPoint;
+		var globalTime;
+		var isFinished=0;
+		var isStart=0;
+		var ip;
+		var serverCnt=target.length;
+		var pingList;
+		var sip;
+		function init(){
+			threadSpeed=new Array();
+			speedPoint=new Array();
+//			for(i=0;i<300;i++)speedPoint[i]=0;
+			for(i=0;i<6;i++)threadSpeed[i]=0;
+			pingList=new Array();
+			for(i=0;i<serverCnt;i++)pingList.push(3000);			
+			globalTime=0;
+			isFinished=0;
+			isStart=0;
+		}
+		function ping(target,i){
+			ptime = performance.now();
+			$.get(target+"?"+performance.now(),function(data){
+				delta =  Math.ceil(performance.now() - ptime);
+				pingList[i]=delta;
+		    });
+		}
+		function sendToServer(){
+			var speedString=''+speedPoint[0];
+			var count=speedPoint.length;
+			for(i=1;i<speedPoint.length;i++)
+				speedString+=' '+speedPoint[i];
+			var pingString="";
+			for(i=0;i<serverCnt;i++)pingString+=pingList[i]+" ";
+			$.post("getData.php", { sysid: 5,sip:sip, ping:pingString,speed:speedString ,count:count},function(data){
+//		    	console.log(data);
+		    });
+		}
+		function timerStart(){
+			var kt=1;
+			intervalId=setInterval(function (){
+				if(isStart==0)return;
+				if(isFinished)return;
+				var spd=0;
+				globalTime+=100;
+				for(i=0;i<kt;i++)spd+=threadSpeed[i];
+				speedPoint.push(spd);
+				console.log(globalTime/100 + " " + spd);
+				if(kt==1&&spd>=0.5/8){
+					kt=2;
+					downloadThread(ip+"?"+performance.now(),1);
+				}
+				if(kt==2&&spd>=1/8){
+					kt=3;
+					downloadThread(ip+"?"+performance.now(),2);
+				}
+				document.getElementById("timeOutput").innerHTML=globalTime/100;
+				if(globalTime>=timeLimit*1000){
+					isFinished=1;
+					clearInterval(intervalId);
+					sendToServer();
+				}
+			},100);
+		}
+		function downloadThread(tip,tid){
+			var xhr = new XMLHttpRequest();
+			var lastThroughput=0;
+			var lastTime=performance.now();
+			xhr.open("GET", tip);
+			xhr.onprogress = function(e) {
+				if(isFinished){
+					xhr.abort();
+					return;
+				}
+				isStart=1;
+				var throughput=e.loaded;
+				var time=performance.now();
+				threadSpeed[tid]=(throughput-lastThroughput)/(time-lastTime)*1000/1024/1024;
+				lastThroughput=throughput;
+				lastTime=time;
+			}
+			xhr.send();
+		}
+		function getIP(){
+			for(i=0;i<serverCnt;i++){
+				ping("http://"+target[i]+"/test.html",i);
+			}
+			intervalId2=setInterval(function (){
+				var mping=pingList[0];
+				var mid=0;
+				for(i=0;i<serverCnt;i++){
+					if(pingList[i]<mping){
+						mping=pingList[i];
+						mid=i;
+					}
+				}
+				ip="http://"+target[mid]+"/fileinf";
+				sip=target[mid];
+				clearInterval(intervalId2);
+			},2000);
+		}
+		function start(){
+			timerStart();
+			for(i=0;i<1;i++)downloadThread(ip+"?"+performance.now(),i);
+		}
+	</script>
+	<body onload="onload()">
+		<!--<button onclick="changeTime(document.getElementById('timeInput').value)">set time</button>-->
+		<!--<input id='timeInput'><br/>-->
+		<!--<button onclick='ping()'>ping</button>-->
+		<button id='start' onclick='start()'>start</button>
+		<div id='timeOutput'>1</div>
+		<div id='showSpeedPoint'></div>
+	</body>
+</html>
+
+
+
