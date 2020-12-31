@@ -1,0 +1,71 @@
+
+## Installation of tcp_fastbts module
+
+Recommended Environment: Ubuntu 16+  with kernel v5.0.1
+
+Kernel Installation:
+
+```shell
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-headers-5.0.1-050001_5.0.1-050001.201903100732_all.deb
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-headers-5.0.1-050001-generic_5.0.1-050001.201903100732_amd64.deb
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-image-unsigned-5.0.1-050001-generic_5.0.1-050001.201903100732_amd64.deb
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-modules-5.0.1-050001-generic_5.0.1-050001.201903100732_amd64.deb
+sudo dpkg -i ***.deb
+
+```
+
+Remove other kernels (or change the boot priority):
+```shell
+dpkg --get-selections| grep linux
+sudo apt-get remove [your old kernels]
+```
+
+Compile and install tcp_fastbts
+```shell
+make
+make install
+```
+
+Switch the congestion control algorithm to tcp_fastbts
+```shell
+echo "" >/etc/sysctl.conf
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=fastbts" >> /etc/sysctl.conf
+sysctl -p
+reboot
+```
+
+## 部署tcp_fastbts模块
+
+推荐使用ubuntu系统，内核版本5.0.1
+
+内核安装:
+```shell
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-headers-5.0.1-050001_5.0.1-050001.201903100732_all.deb
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-headers-5.0.1-050001-generic_5.0.1-050001.201903100732_amd64.deb
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-image-unsigned-5.0.1-050001-generic_5.0.1-050001.201903100732_amd64.deb
+wget https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.0.1/linux-modules-5.0.1-050001-generic_5.0.1-050001.201903100732_amd64.deb
+sudo dpkg -i ***.deb
+```
+
+删除其他内核（或切换启动顺序）
+```shell
+dpkg --get-selections| grep linux
+sudo apt-get remove [your old kernels]
+```
+
+编译安装 tcp_fastbts
+```shell
+make
+make install
+```
+
+将拥塞控制算法切换到 tcp_fastbts
+```shell
+echo "" >/etc/sysctl.conf
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=fastbts" >> /etc/sysctl.conf
+sysctl -p
+reboot
+```
+

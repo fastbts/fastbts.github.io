@@ -111,6 +111,7 @@ struct minmax mybw;
 u32 myrttcnt;
 u32 myfullbwcnt;
 u32 myfullbw;
+u64 mygrowpg;
 
 static int send_bbr_to_user(struct read_bbr *send_bbr)
 {
@@ -824,9 +825,12 @@ static void bbr_update_bw(struct sock *sk, const struct rate_sample *rs)
 	}
 	if(mystate==0){
 		// u64 temp=((u64)mybtlbw)*((u64)BBR_UNIT)*10000/(6058*bw+3466*mybtlbw);
-		u64 temp=((u64)mybtlbw)*((u64)BBR_UNIT)*10000;
-		u64 temp2=(6058*bw+3466*(u64)mybtlbw);
+		// u64 temp=((u64)mybtlbw)*((u64)BBR_UNIT)*10000;
+		// u64 temp2=(6058*bw+3466*(u64)mybtlbw);
+		u64 temp=((u64)mybtlbw*2885-(u64)bw*1835)*((u64)BBR_UNIT);
+		u64 temp2=((u64)mybtlbw);
 		do_div(temp,temp2);
+		mygrowpg=temp;
 //		bbr->pacing_gain = BBR_UNIT /(0.6058*bw/mybtlbw+0.3466);
 		bbr->pacing_gain = temp;
 		// u32 temp3=BBR_UNIT*105;
@@ -839,7 +843,11 @@ static void bbr_update_bw(struct sock *sk, const struct rate_sample *rs)
 		// }
 	}
 	if(mystate==1){
-		bbr->pacing_gain = BBR_UNIT *3/4;
+		u64 temp=BBR_UNIT;
+		u64 temp2=mygrowpg;
+		do_div(temp,temp2);
+		bbr->pacing_gain = temp;
+//		bbr->pacing_gain = BBR_UNIT *3/4;
 //		bbr->pacing_gain = 244;
 	}
 }
