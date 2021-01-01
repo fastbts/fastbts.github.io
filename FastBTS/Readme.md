@@ -1,5 +1,5 @@
 
-## Installation of tcp_fastbts module
+## Installation of the tcp_fastbts module
 
 Recommended Environment: Ubuntu 16+  with kernel v5.0.1
 
@@ -35,6 +35,21 @@ sysctl -p
 reboot
 ```
 
+## Installation of the web server
+
+Install a web reserve proxy software (e.g., nginx)
+
+```shell
+apt-get install nginx
+```
+
+Put the ```index.html``` to the web directory(/var/www/html)
+
+If you want to save and leverage the test history, install a database (such as SQLite/MySQL) and run ```install.sql```, put ```saveData.php, getData.php``` to the web directory.
+
+
+<!--
+
 ## 部署tcp_fastbts模块
 
 推荐使用ubuntu系统，内核版本5.0.1
@@ -69,3 +84,4 @@ sysctl -p
 reboot
 ```
 
+-->
