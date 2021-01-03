@@ -1,7 +1,7 @@
 
 ## Installation of the tcp_fastbts module
 
-Recommended Environment: Ubuntu 16+  with kernel v5.0.1
+Recommended Environment: Ubuntu 16+  with kernel v5.0.1, gcc version 4.8 or later.
 
 Kernel Installation:
 
@@ -20,13 +20,13 @@ dpkg --get-selections| grep linux
 sudo apt-get remove [your old kernels]
 ```
 
-Compile and install tcp_fastbts
+Compile and install server-side FastBTS:
 ```shell
 make
 make install
 ```
 
-Switch the congestion control algorithm to tcp_fastbts
+Switch the congestion control algorithm to EBP:
 ```shell
 echo "" >/etc/sysctl.conf
 echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
@@ -37,15 +37,15 @@ reboot
 
 ## Installation of the web server
 
-Install a web reserve proxy software (e.g., nginx)
+Install a web reserve proxy software (e.g., nginx):
 
 ```shell
 apt-get install nginx
 ```
 
-Put the ```index.html``` to the web directory(/var/www/html)
+Put the ```index.html``` to the web directory(/var/www/html).
 
-If you want to save and leverage the test history, install a database (such as SQLite/MySQL) and run ```install.sql```, put ```saveData.php, getData.php``` to the web directory.
+Currently, the data-driven server selection mechanism is not enabled. If you want to enable the DSS mechanism, install a database (such as SQLite/MySQL) and run ```install.sql```, put ```saveData.php, getData.php``` into the web directory.
 
 
 <!--
