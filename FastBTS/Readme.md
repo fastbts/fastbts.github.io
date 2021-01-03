@@ -1,7 +1,9 @@
 
-## Installation of the tcp_fastbts module
+## Installation of FastBTS
 
-Recommended Environment: Ubuntu 16+  with kernel v5.0.1, gcc version 4.8 or later.
+## Installation of the test servers
+
+Recommended Environment: Ubuntu 16+ with kernel v5.0.1, gcc version 4.8 or later.
 
 Kernel Installation:
 
@@ -45,7 +47,7 @@ apt-get install nginx
 
 Put the ```index.html``` to the web directory(/var/www/html).
 
-Currently, the data-driven server selection mechanism is not enabled. If you want to enable the DSS mechanism, install a database (such as SQLite/MySQL) and run ```install.sql```, put ```saveData.php, getData.php``` into the web directory.
+Currently, the data-driven server selection mechanism is not enabled. If you want to enable the DSS mechanism, install a database (such as SQLite/MySQL) and run ```install.sql```, put ```saveData.php```, ```getData.php``` into the web directory.
 
 
 <!--
