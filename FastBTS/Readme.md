@@ -1,7 +1,7 @@
 
 # Installation of FastBTS
 
-## Installation of the test servers
+## Test Servers
 
 Recommended Environment: Ubuntu 16.04 LTS with kernel version 5.0.1, gcc version 4.8 or later.
 
@@ -37,7 +37,7 @@ sysctl -p
 reboot
 ```
 
-## Installation of the web server
+## Web Server
 
 Install a web reserve proxy (e.g., nginx):
 
