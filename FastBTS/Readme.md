@@ -1,5 +1,5 @@
 
-## Installation of FastBTS
+# Installation of FastBTS
 
 ## Installation of the test servers
 
